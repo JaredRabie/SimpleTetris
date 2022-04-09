@@ -1,6 +1,8 @@
 import pygame
 import os
 
+#test
+
 block_width = 50
 white = (255,255,255)
 fps = 60
