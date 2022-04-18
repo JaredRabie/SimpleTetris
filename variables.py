@@ -4,6 +4,7 @@ brick_width = 50
 white = (255,255,255)
 black = (0,0,0)
 fps = 60
+place_cooldown = 15
 vert_movement_cooldown = 60
 movement_cooldown = 15     #Number of frames before movement is allowed again (Prevents player moving too quickly since keypresses are polled with 60fps)
 
@@ -23,21 +24,22 @@ hitbox_generators = [green_hitbox_generator, yellow_hitbox_generator, turquoise_
 
 
 grid = [[None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None],\
-                       [None, None, None, None, None, None, None, None, None, None]]
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None],\
+        [None, None, None, None, None, None, None, None, None, None]]

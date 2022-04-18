@@ -14,6 +14,9 @@ class placed_tetronimo_grid:
             brick_row = 19 - ((brick.y//brick_width) - 1)
             self.__grid[brick_row][brick_col] = current_tetronimo.get_colour()        
     
+    def get_grid(self):
+        return self.__grid
+
     def display(self):
         for row in range(0, 19):
             for col in range(0, 10):
@@ -23,17 +26,28 @@ class placed_tetronimo_grid:
                     brick = pygame.Rect(x_coord, y_coord, brick_width, brick_width)
                     colour = self.__grid[row][col]
                     pygame.draw.rect(window, colour, brick)
-                
+    
+    def check_full_row(self):
+        for indx, row in enumerate(self.__grid):
+            #Check that row is all nonempty squares
+            is_empty = True
+            for item in row:
+                if item == None:
+                    is_empty = False
+            if is_empty:
+                print(self.__grid)
+                self.__grid.pop(indx)
+                self.__grid.insert(-1, [None, None, None, None, None, None, None, None, None, None])
+                self.check_full_row()
+                print(self.__grid)
+            
+            
+
 
 class tetronimo_stack_class:
     def __init__(self):
         self.__items = []
     
-    def get_items(self):
-        return self.__items
-    
-    def add_top(self, item):
-        self.__items = [item] + self.__items
     def add_bottom(self, item):
         self.__items = self.__items + [item]
 
@@ -42,30 +56,24 @@ class tetronimo_stack_class:
         top_item = self.__items[0]
         self.__items = self.__items[1:]
         return top_item
-    def remove_bottom(self):
-        bottom_item = self.__items[-1]
-        self.__items = self.__items[:-1]
-        bottom_item -= game_border.width   #Moves piece back into play to enable movement
-        return bottom_item
     
     #Remove without returning bottom/top item from stack. 
     def peek_top(self):
         return self.__items[0]
-    def peek_bottom(self):
-        return self.__items[-1]
-
-    def size(self):
-        return len(self.__items)
     
     def populate(self, size, hitbox_generators):
         while size > 0:
-            colour = hitbox_generators[size % len(hitbox_generators)][-1] #taking colour from final element
-            lst = hitbox_generators[size % len(hitbox_generators)][:len(hitbox_generators)+1] #taking all tuples (everything but colour)
+            #Filter generator information
+            colour = hitbox_generators[size % len(hitbox_generators)][-1]
+            lst = hitbox_generators[size % len(hitbox_generators)][:len(hitbox_generators)+1]
+            
+            #Create hitbox element
             hitbox = []
             for item in lst:
-                print(item)
                 hitbox.insert(0, pygame.Rect(tetronimo_bench_x + item[0]*brick_width, tetronimo_bench_y + item[1]*brick_width, brick_width, brick_width))
             hitbox.append(colour)
+
+            #Add hitbox element
             self.add_bottom(tetronimo_class(hitbox))
             size -= 1
 
@@ -120,8 +128,19 @@ class tetronimo_class():
         colour = self.get_colour()
         for brick in self.__bricks:
             pygame.draw.rect(window, colour, brick)
+    
+    def check_collision(self, tetronimos_placed):
+        for brick in self.__bricks:
+            brick_col = (brick.x//brick_width) - 1 
+            brick_row = 19 - ((brick.y//brick_width) - 1)
+            try:
+                if tetronimos_placed.get_grid()[brick_row - 1][brick_col] != None:
+                    return True
+            except IndexError:
+                return True
+        return False
 
-def movement_handler(keys_pressed, current_tetronimo, lateral_timer, vertical_timer):
+def movement_handler(keys_pressed, current_tetronimo, lateral_timer, vertical_timer, place_timer, tetronimos_placed):
     if lateral_timer > movement_cooldown:
         if keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_RIGHT]: #Check if we need to reset the lateral_timer (lateral_timer resets if the object moves to limit the speed of each object)
             if keys_pressed[pygame.K_LEFT] and current_tetronimo.x > game_border.x:
@@ -132,14 +151,16 @@ def movement_handler(keys_pressed, current_tetronimo, lateral_timer, vertical_ti
                 current_tetronimo += brick_width
                 lateral_timer = 0
 
-    if keys_pressed[pygame.K_DOWN]:
-        pass
+    if keys_pressed[pygame.K_DOWN] and place_timer > place_cooldown:
+        while not current_tetronimo.check_collision(tetronimos_placed):
+            current_tetronimo.move_down()
+        place_timer = 0
     
     if vertical_timer > vert_movement_cooldown:
         current_tetronimo.move_down()
         vertical_timer = 0
 
-    return lateral_timer + 1, vertical_timer + 1
+    return lateral_timer + 1, vertical_timer + 1, place_timer + 1
 
 def draw_window(current_tetronimo, tetronimos_placed):
     window.fill(white)
@@ -161,6 +182,7 @@ def main():
     run = True
     lateral_timer = 0
     vertical_timer = 0
+    place_timer = 0
     while run:
         clock.tick(fps)
         for event in pygame.event.get():
@@ -168,9 +190,10 @@ def main():
                 run = False
         
         keys_pressed = pygame.key.get_pressed()
-        lateral_timer, vertical_timer = movement_handler(keys_pressed, current_tetronimo, lateral_timer, vertical_timer)
-        if current_tetronimo.y + current_tetronimo.height > 20*brick_width:
+        lateral_timer, vertical_timer, place_timer = movement_handler(keys_pressed, current_tetronimo, lateral_timer, vertical_timer, place_timer, tetronimos_placed)
+        if (current_tetronimo.y + current_tetronimo.height > 20*brick_width) or current_tetronimo.check_collision(tetronimos_placed):
             tetronimos_placed.place(current_tetronimo)
+            tetronimos_placed.check_full_row()
             current_tetronimo = tetronimo_stack.remove_top()
             current_tetronimo -= game_border.width
 
